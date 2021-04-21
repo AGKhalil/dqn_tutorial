@@ -22,22 +22,6 @@ def set_all_seeds(seed):
     torch.backends.cudnn.deterministic = True
 
 
-def evaluate(dqn, env):
-    episode_rewards = []
-    for episode in range(10):
-        obs = env.reset()
-        done = False
-        episode_reward = 0
-        while not done:
-            action = dqn.get_action(obs)
-            new_obs, reward, done, _ = env.step(action)
-            env.render()
-            episode_reward += reward
-            obs = new_obs
-        episode_rewards.append(episode_reward)
-    print("Average episodes (10): ", np.mean(episode_rewards))
-
-
 class ReplayBuffer:
     def __init__(
         self, replay_size, batch_size, device, observation_space, action_space
@@ -172,6 +156,21 @@ class DQN:
             if episode % self.update_target == 0:
                 self.target.load_state_dict(self.value.state_dict())
 
+    def evaluate(self):
+        episode_rewards = []
+        for episode in range(10):
+            obs = self.env.reset()
+            done = False
+            episode_reward = 0
+            while not done:
+                action = self.get_action(obs)
+                new_obs, reward, done, _ = self.env.step(action)
+                self.env.render()
+                episode_reward += reward
+                obs = new_obs
+            episode_rewards.append(episode_reward)
+        print("Average episodes (10): ", np.mean(episode_rewards))
+
 
 seed = np.random.randint(1000)
 eps_start = 1
@@ -237,4 +236,4 @@ dqn.train()
 
 torch.save(value.state_dict(), "model.h5")
 
-evaluate(dqn, env)
+dqn.evaluate()
