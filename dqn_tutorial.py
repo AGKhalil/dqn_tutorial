@@ -53,15 +53,14 @@ class ReplayBuffer:
             0, self.replay_size if self.full else self.index, size=self.batch_size
         )
 
-        states = self.states[idxs]
-        next_states = self.next_states[idxs]
-
-        states = torch.as_tensor(states, device=self.device).float()
+        states = torch.as_tensor(self.states[idxs], device=self.device).float()
         actions = torch.as_tensor(self.actions[idxs], device=self.device)
         rewards = (
             torch.as_tensor(self.rewards[idxs], device=self.device).squeeze().float()
         )
-        next_states = torch.as_tensor(next_states, device=self.device).float()
+        next_states = torch.as_tensor(
+            self.next_states[idxs], device=self.device
+        ).float()
         dones = torch.as_tensor(self.dones[idxs], device=self.device).squeeze().float()
         return states, actions, rewards, next_states, dones
 
@@ -69,9 +68,9 @@ class ReplayBuffer:
 class MLP(nn.Module):
     def __init__(self, layers, observation_space, action_space):
         super(MLP, self).__init__()
-        self.fc1 = nn.Linear(env.observation_space.shape[0], 64)
+        self.fc1 = nn.Linear(observation_space.shape[0], 64)
         self.fc2 = nn.Linear(64, 32)
-        self.fc3 = nn.Linear(32, env.action_space.n)
+        self.fc3 = nn.Linear(32, action_space.n)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
