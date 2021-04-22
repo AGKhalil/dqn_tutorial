@@ -66,11 +66,11 @@ class ReplayBuffer:
 
 
 class MLP(nn.Module):
-    def __init__(self, layers, observation_space, action_space):
+    def __init__(self, observation_space, action_space):
         super(MLP, self).__init__()
-        self.fc1 = nn.Linear(observation_space.shape[0], 64)
+        self.fc1 = nn.Linear(observation_space, 64)
         self.fc2 = nn.Linear(64, 32)
-        self.fc3 = nn.Linear(32, action_space.n)
+        self.fc3 = nn.Linear(32, action_space)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
@@ -183,7 +183,6 @@ lr = 1e-3
 env_name = "CartPole-v0"
 device = "cpu"
 replay_size = 10000
-layers = [32, 64]
 env = gym.make(env_name)
 observation_space = env.observation_space.shape[0]
 action_space = env.action_space.n
@@ -211,8 +210,8 @@ device = torch.device(device)
 
 rbuffer = ReplayBuffer(replay_size, batch_size, device, observation_space, action_space)
 
-value = MLP(layers, observation_space, action_space).to(device)
-target = MLP(layers, observation_space, action_space).to(device)
+value = MLP(observation_space, action_space).to(device)
+target = MLP(observation_space, action_space).to(device)
 wandb.watch(value)
 wandb.watch(target)
 
